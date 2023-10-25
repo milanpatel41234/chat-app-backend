@@ -5,9 +5,8 @@ module.exports = async (req, res, next) => {
   try {
     const token = req.header("token");
     if (!token) throw new Error("Invalid token");
-    const { id } = jwt.verify(token, process.env.JWT_KEY);
-
-    const foundUser = await user.findByPk(id);
+    const { userId } = jwt.verify(token, process.env.JWT_KEY);
+    const foundUser = await user.findByPk(userId);
     if (foundUser) {
       req.user = foundUser;
       next();
@@ -15,6 +14,6 @@ module.exports = async (req, res, next) => {
       throw new Error("Invalid token");
     }
   } catch (error) {
-    res.status(405).send({ success: false, message: error.message });
+    res.status(405).send({ success: false, message: error});
   }
 };

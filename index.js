@@ -4,12 +4,21 @@ const dotenv = require('dotenv');
 dotenv.config()
 const db = require('./database/db')
 const authRouter = require('./routes/authRoutes');
+const messageRouter = require('./routes/messageRoutes');
+const authMiddleware = require('./middleware/authMiddleware');
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
- db.sequelize.sync();
 
-app.use('/user' , authRouter)
+const {user , message} = db;
+user.hasMany(message)
+message.belongsTo(user);
+
+db.sequelize.sync();
+
+app.use('/user' , authRouter);
+app.use('/message', authMiddleware, messageRouter)
 
 app.listen(5000)

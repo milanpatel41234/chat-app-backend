@@ -8,13 +8,11 @@
         const checkUser = user.findOne({where: {email}})
         const createHash = bcrypt.hash(password, 10);
         const [foudUser , hash] = await Promise.all([checkUser , createHash]);
-        if(foudUser) throw new Error( "This email already exists");
+        if(foudUser) throw new Error("This email already exists");
         const response = await user.create({ name, email, mobile, password: hash});
         return response;
       } catch (err) {
-        throw {
-          error: err,
-        };
+        throw({message:err.message });
       }
     
 };
