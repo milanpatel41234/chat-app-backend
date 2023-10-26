@@ -2,7 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 dotenv.config()
-const db = require('./database/db')
+const db = require('./models/db')
 const authRouter = require('./routes/authRoutes');
 const messageRouter = require('./routes/messageRoutes');
 const authMiddleware = require('./middleware/authMiddleware');

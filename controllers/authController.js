@@ -1,4 +1,11 @@
-const userModel = require("../models/userModel");
+const db = require("../models/db");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const user = db.user;
+
+const generateToken = (userId) => {
+  return jwt.sign({ userId }, process.env.JWT_KEY);
+};
 
 exports.login = async (req, res) => {
   const userEmail = req.body.email;
@@ -8,15 +15,12 @@ exports.login = async (req, res) => {
       .status(401)
       .send({ message: "Email and password are reqiured", login: false });
   try {
-    const user = await userModel.getUserByEmail(userEmail);
+    const usr = await await user.findOne({where: {email:userEmail}});
 
-    if (user) {
-      const result = await userModel.comparePasswords(
-        userPassword,
-        user.password
-      );
+    if (usr) {
+      const result = await bcrypt.compare(userPassword,usr.password);
       if (result) {
-        const token = userModel.generateToken(user.id);
+        const token = generateToken(user.id);
 
         res.send({ message: "Login successfully", login: true, token });
       } else {
@@ -39,8 +43,12 @@ exports.login = async (req, res) => {
 exports.signup = async (req, res) => {
   try {
     const { email, password, name, mobile } = req.body;
-    const response = await userModel.createUser(name, email, mobile, password);
-    const token = userModel.generateToken(response.id);
+    const checkUser = user.findOne({where: {email}})
+    const createHash = bcrypt.hash(password, 10);
+    const [foudUser , hash] = await Promise.all([checkUser , createHash]);
+    if(foudUser) return res.status(402).send({ message: "This email already exists",success:false});
+    const response = await user.create({ name, email, mobile, password: hash});
+    const token = generateToken(response.id);
     return res.json({ success: true, message: "User created successfully", login: true, token  });
   } catch (err) {
     res.status(500).send({ message: err.message, error: err });
