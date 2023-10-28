@@ -13,11 +13,15 @@ exports.postMessage = async (req, res) => {
 
 exports.getMessage = async (req, res) => {
   try {
+    const offset = +req.query.offset;
     const response = await message.findAll({
       include: [{ model: user, attributes: ["name"] }],
       attributes: ["id", "text", "createdAt"],
-      order: [["createdAt", "ASC"]],
+      order: [["id", "ASC"]],
+      offset:offset,
     });
     res.send(response);
-  } catch (error) {}
+  } catch (error) {
+    res.status(500).send(error);
+  }
 };
