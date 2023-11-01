@@ -21,6 +21,19 @@ return res.send(response.groups);
     res.status(500).send(error);
 }
 }
+
+exports.getMember = async(req , res)=>{
+try {
+    const userId = req.user.id;
+    const groupId = req.query.group;
+    const response = await group.findByPk(groupId, { include: 'users' });
+
+return res.send({members:response.users , isAdmin:response.adminId===userId , adminId:response.adminId});
+} catch (error) {
+    res.status(500).send(error);
+}
+}
+
 exports.addMember = async(req , res)=>{
 try {
     const groupId = +req.query.group;
@@ -36,3 +49,22 @@ return res.send({success:true,message:'Added member successfully'});
 }
 }
 
+exports.removeMember = async(req , res)=>{
+try {
+    const groupId = +req.query.group;
+    const memberId = +req.query.member;
+    const findGroup =  group.findByPk(groupId);
+    const findMember = user.findByPk(memberId);
+    const [foundGroup, foundMember] = await Promise.all([findGroup, findMember]);
+    console.log('ffffffffff' , foundGroup , foundMember)
+    if (foundMember && foundGroup) {
+        await foundMember.removeGroup(foundGroup);
+        res.send({message:'Member removed successfully' , success:true});
+      } else {
+        res.send({message:'User or Group not found.' , success:false});
+      }
+
+} catch (error) {
+    res.status(500).send(error);
+}
+}

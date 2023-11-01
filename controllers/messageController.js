@@ -21,8 +21,8 @@ exports.getMessage = async (req, res) => {
       include: [{ model: user, attributes: ["name"] }],
       attributes: ["id", "text", "createdAt"],
       order: [["id", "ASC"]],
-      offset:offset,
     });
+  
     res.send(response);
   } catch (error) {
     res.status(500).send(error);
